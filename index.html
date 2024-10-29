@@ -215,5 +215,28 @@
         // 初期表示
         renderInventory();
     </script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCE95QRW3xOlZf5X-FuIgMIW2qrNMuAx3o",
+    authDomain: "stock-management-9ff17.firebaseapp.com",
+    projectId: "stock-management-9ff17",
+    storageBucket: "stock-management-9ff17.appspot.com",
+    messagingSenderId: "450155323277",
+    appId: "1:450155323277:web:88ac1e92d5c6d7e64aa7c4",
+    measurementId: "G-5B429L8P5G"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 </html>
