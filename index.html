@@ -111,51 +111,70 @@
     <h1 style="text-align: center; color: #2c3e50;">在庫管理システム</h1>
     <div id="app"></div>
 
+    <!-- Firebase SDKの追加 -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+
     <script>
-        const inventory = {
-            drinks: [
-                { id: 1, name: 'アイスコーヒー', unit: '本', count: { kitchen: 0, warehouse: 0 } },
-                { id: 2, name: 'アイスティー', unit: '本', count: { kitchen: 0, warehouse: 0 } },
-                { id: 3, name: 'コーラ', unit: '本', count: { kitchen: 0, warehouse: 0 } },
-                { id: 4, name: 'リンゴジュース', unit: '本', count: { kitchen: 0, warehouse: 0 } },
-                { id: 5, name: 'ウーロン茶', unit: '本', count: { kitchen: 0, warehouse: 0 } },
-                { id: 6, name: 'コーンポタージュ', unit: '杯', count: { kitchen: 0, warehouse: 0 } }
-            ],
-            sweets: [
-                { id: 7, name: 'モンブラン', unit: '個', count: { kitchen: 0, warehouse: 0 } },
-                { id: 8, name: 'チョコレートケーキ', unit: '個', count: { kitchen: 0, warehouse: 0 } },
-                { id: 9, name: 'チーズケーキ', unit: '個', count: { kitchen: 0, warehouse: 0 } },
-                { id: 10, name: 'ドーナツ', unit: '個', count: { kitchen: 0, warehouse: 0 } }
-            ],
-            lightMeals: [
-                { id: 11, name: '唐揚げ', unit: '袋', count: { kitchen: 0, warehouse: 0 } },
-                { id: 12, name: 'マルゲリータピザ', unit: '枚', count: { kitchen: 0, warehouse: 0 } },
-                { id: 13, name: 'クアトロフォルマッジピザ', unit: '枚', count: { kitchen: 0, warehouse: 0 } }
-            ]
+        // Firebaseの初期化
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
+        // Firebaseの設定
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const inventory = {
+            drinks: [],
+            sweets: [],
+            lightMeals: []
+        };
+
+        // Firebaseから在庫データの読み込み
+        function loadInventoryData() {
+            firebase.database().ref('inventory').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    inventory.drinks = data.drinks || [];
+                    inventory.sweets = data.sweets || [];
+                    inventory.lightMeals = data.lightMeals || [];
+                    renderInventory();
+                }
+            });
+        }
+
+        // 在庫を更新し、Firebaseに保存する
         function updateStock(categoryKey, itemId, location, isIncrease) {
             const item = inventory[categoryKey].find(item => item.id === itemId);
             const input = document.getElementById(`amount-${itemId}-${location}`);
             const amount = parseInt(input.value) || 1;
 
             if (item) {
-                if (isIncrease) {
-                    item.count[location] += amount;
-                } else {
-                    item.count[location] = Math.max(0, item.count[location] - amount);
-                }
+                item.count[location] = isIncrease ? item.count[location] + amount : Math.max(0, item.count[location] - amount);
+                saveInventoryData();
                 renderInventory();
             }
             input.value = '';
         }
 
-        function getCategoryTotal(categoryItems) {
-            return categoryItems.reduce((sum, item) => 
-                sum + item.count.kitchen + item.count.warehouse, 0
-            );
+        // Firebaseにデータを保存
+        function saveInventoryData() {
+            firebase.database().ref('inventory').set(inventory);
         }
 
+        // 合計数の計算関数は元のまま
+        function getCategoryTotal(categoryItems) {
+            return categoryItems.reduce((sum, item) => sum + item.count.kitchen + item.count.warehouse, 0);
+        }
+
+        // 在庫の表示を更新
         function renderInventory() {
             const app = document.getElementById('app');
             app.innerHTML = '';
@@ -212,31 +231,8 @@
             app.appendChild(grandTotal);
         }
 
-        // 初期表示
-        renderInventory();
+        // 初期データの読み込み
+        loadInventoryData();
     </script>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCE95QRW3xOlZf5X-FuIgMIW2qrNMuAx3o",
-    authDomain: "stock-management-9ff17.firebaseapp.com",
-    projectId: "stock-management-9ff17",
-    storageBucket: "stock-management-9ff17.appspot.com",
-    messagingSenderId: "450155323277",
-    appId: "1:450155323277:web:88ac1e92d5c6d7e64aa7c4",
-    measurementId: "G-5B429L8P5G"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
